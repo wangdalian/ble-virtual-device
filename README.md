@@ -1,2 +1,1 @@
-# ble-virtual-device
-ble virtual device
+运行在E1000容器应用，模拟设备常用的功能及操作
