@@ -1,7 +1,7 @@
 
 const util = require('util');
 const bleno = require('bleno');
-const logger = require('../lib/logger');
+const logger = require('../../lib/logger');
 const BlenoCharacteristic = bleno.Characteristic;
 
 const uuid = '2a01';

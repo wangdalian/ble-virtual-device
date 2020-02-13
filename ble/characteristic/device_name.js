@@ -1,8 +1,8 @@
 
 const util = require('util');
 const bleno = require('bleno');
-const logger = require('../lib/logger');
-const deviceEnum = require('../enum/device');
+const logger = require('../../lib/logger');
+const deviceEnum = require('../../enum/device');
 const BlenoCharacteristic = bleno.Characteristic;
 
 const uuid = '2a00';

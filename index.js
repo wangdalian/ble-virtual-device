@@ -1,6 +1,6 @@
 const bleno = require('bleno');
 const logger = require('./lib/logger');
-const services = require('./service/service');
+const services = require('./ble/service/service');
 const advertising = require('./module/advertising');
 
 // TODO: 需要关闭cassiablue，目前只有AC接口，没有AP接口
