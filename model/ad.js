@@ -1,5 +1,5 @@
 const hciEnum = require('../enum/hci');
-const logger = require('../lib/logger');
+const logger = require('../lib/util').genModuleLogger(__filename);
 
 let manufacturerSpecificData = {
   step: 0x112233, // 3字节，小端
@@ -7,9 +7,10 @@ let manufacturerSpecificData = {
   heartrate: 0x66, // 1字节，小端
   battery: 0x16, // 1字节
   sportType: 0x01, // 1字节
+  unknown: 0x00, // 1字节
   mac: null // 6字节
 };
-const manufacturerSpecificDataLen = 14;
+const manufacturerSpecificDataLen = 15;
 
 // 广播包中的flag，格式：长度1B + 类型1B + 数据
 function _adDataPackFlags(buffer, offset) {
@@ -42,7 +43,7 @@ function _adDataPackData(buffer, data, offset) {
   offset = buffer.writeUInt8(data.heartrate, offset);
   offset = buffer.writeUInt8(data.battery, offset);
   offset = buffer.writeUInt8(data.sportType, offset);
-  offset = buffer.writeUInt8(0x00, offset); // ??不清楚啥作用??
+  offset = buffer.writeUInt8(data.unknown, offset); // ??不清楚啥作用??
   if (!data.mac) {
     data.mac = require('bleno').address.replace(/:/g, '');
     logger.info('device mac:', data.mac);

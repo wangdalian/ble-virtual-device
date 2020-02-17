@@ -1,5 +1,11 @@
 {
+  "app": {
+    "port": 3000
+  },
   "advertising": {
     "interval": 1000
+  },
+  "message": {
+    "capacity": 7
   }
 }

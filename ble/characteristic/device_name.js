@@ -1,7 +1,7 @@
 
 const util = require('util');
 const bleno = require('bleno');
-const logger = require('../../lib/logger');
+const logger = require('../../lib/util').genModuleLogger(__filename);
 const deviceEnum = require('../../enum/device');
 const BlenoCharacteristic = bleno.Characteristic;
 

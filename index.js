@@ -1,34 +1,34 @@
-const bleno = require('bleno');
-const logger = require('./lib/logger');
-const services = require('./ble/service/service');
-const advertising = require('./module/advertising');
+const thenjs = require('thenjs');
+const util = require('./lib/util');
+const sseLib = require('./lib/sse');
+const logger = util.genModuleLogger(__filename);
+const bleModule = require('./module/ble');
+const appModule = require('./module/app');
 
-// TODO: 需要关闭cassiablue，目前只有AC接口，没有AP接口
+process.on('uncaughtException', function(error) {
+  logger.warn('uncaught exception exit:', error.stack ? error.stack : JSON.stringify(error));
+  process.exit(1);
+});
 
-function bleStateChangeHandler(state) {
-  if (state === 'poweredOn') {
-    logger.info('state power on, start advertising');
-    advertising.startAdvertising(services.servicesUUID);
+function main(callback) {
+  thenjs(function(cont) {
+    sseLib.init();
+    cont(null, null);
+  }).then(function(cont) {
+    bleModule.start();
+    cont(null, null);
+  }).then(function(cont) {
+    appModule.init(cont);
+  }).fin(function(cont, err, ret) {
+    return callback(err, null);
+  });
+}
+
+main(function(err) {
+  if (err) {
+    logger.warn('app start error, exit:', err);
+    process.exit(1);
   } else {
-    logger.info('state power on, stop advertising');
-    bleno.stopAdvertising();
+    logger.info('app start ok');
   }
-}
-
-function bleSetServicesHandler(error) {
-  if (error) {
-    logger.warn('set services error:', error);
-    process.exit(1);
-  }
-}
-
-function bleAdvertisingStartHandler(error) {
-  if (error) {
-    logger.warn('start advertising error:', error);
-    process.exit(1);
-  }
-  bleno.setServices(services.servicesInstance, bleSetServicesHandler);
-}
-
-bleno.on('stateChange', bleStateChangeHandler);
-bleno.on('advertisingStart', bleAdvertisingStartHandler);
+});

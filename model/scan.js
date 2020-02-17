@@ -1,3 +1,6 @@
+/**
+ * 扫描响应包
+ */
 const hciEnum = require('../enum/hci');
 const deviceEnum = require('../enum/device');
 
@@ -19,6 +22,5 @@ function pack() {
 }
 
 module.exports = {
-  pack,
   pack,
 };
