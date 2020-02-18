@@ -1,0 +1,79 @@
+
+HTML {
+  width: 100%;
+  height: 100%;
+}
+
+BODY {
+  height: 100%;
+  background-color: #123455;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+}
+
+#box {
+  width: 320px;
+  height: 600px;
+  background-color: #000;
+  border-radius: 5%;
+  padding-left: 30px;
+  padding-top: 50px;
+  box-shadow: 8px 8px 8px 8px rgba(17,17,17,0.5), -8px 8px 8px 8px rgba(17,17,17,0.5)
+}
+#box:hover {
+  cursor: pointer;
+}
+
+#app {
+  width: 240px;
+  height: 500px;
+  background-color: #111;
+  text-align: center;
+  color: #fff;
+  padding: 20px;
+}
+
+#app .myicon {
+  display: block;
+  font-size: 20px;
+  padding-top: 20px;
+}
+
+.dateweek {
+  font-size: 30px;
+  padding-top: 20px;
+}
+
+.hour {
+  font-size: 120px;
+}
+
+.minute .el-col{
+  margin-top: -30px;
+  font-size: 120px;
+}
+
+.name {
+  font-size: 40px;
+}
+
+#messageInfo {
+  text-align: left;
+}
+
+#messageInfo #sender {
+  font-style: italic;
+  font-size: 16px;
+}
+
+#messageInfo #recvTimeStr {
+  font-style: italic;
+  text-align: right;
+  font-size: 16px;
+}
+
+#messageInfo #content {
+  font-size: 30px;
+}

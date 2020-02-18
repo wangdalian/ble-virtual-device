@@ -1,12 +1,14 @@
 'use strict';
 const _ = require('lodash');
 const feNotify = require('../router/fe_notify');
+const message = require('../router/message');
 
 /**
  * 各个模块根路由
  */
 const routers = {
     '/api/fe-notify': feNotify,
+    '/api/message': message
 };
 
 /**

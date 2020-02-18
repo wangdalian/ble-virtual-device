@@ -2,10 +2,16 @@
   "app": {
     "port": 3000
   },
+  "ble": {
+    "waitInitTime": 10000
+  },
   "advertising": {
     "interval": 1000
   },
   "message": {
     "capacity": 7
+  },
+  "screen": {
+    "interval": 1000
   }
 }

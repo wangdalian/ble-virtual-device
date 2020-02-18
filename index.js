@@ -4,6 +4,7 @@ const sseLib = require('./lib/sse');
 const logger = util.genModuleLogger(__filename);
 const bleModule = require('./module/ble');
 const appModule = require('./module/app');
+const screenInfoModule = require('./module/screen_info');
 
 process.on('uncaughtException', function(error) {
   logger.warn('uncaught exception exit:', error.stack ? error.stack : JSON.stringify(error));
@@ -12,6 +13,9 @@ process.on('uncaughtException', function(error) {
 
 function main(callback) {
   thenjs(function(cont) {
+    screenInfoModule.init();
+    cont(null, null);
+  }).then(function(cont) {
     sseLib.init();
     cont(null, null);
   }).then(function(cont) {

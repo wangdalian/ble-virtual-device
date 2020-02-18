@@ -5,11 +5,13 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const logger = require('../lib/logger');
+const util = require('../lib/util');
 const corsMiddleware = require('./cros');
 const errMiddleware = require('./error');
 const routerMiddleware = require('./router');
 const clientMiddleware = require('./client');
+
+const logger = util.genModuleLogger(__filename);
 
 /**
  * 注册所有处理中间件
