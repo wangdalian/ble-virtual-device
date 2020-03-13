@@ -23,17 +23,13 @@ function promiseWait(time) {
 }; 
 
 function promiseRetry(fn, fnName, count, delay, ...p) { 
-  logger.info(`call ${fnName}:`, count, delay)
-  return fn(...p).then(() => {
-    logger.info(`${fnName} success`);
-  }).catch(function (err) { 
-    logger.warn(`1111111111 ${fnName} error, will retry:`, count, delay, err)
+  return fn(...p).then().catch(function (err) { 
     if (count > 0) {
       return promiseWait(delay).then(function() { 
         return promiseRetry(fn, fnName, count - 1, delay, ...p); 
       })
     } else {
-      return Promise.reject(`failed: ${fn.prototype.valueOf}`);
+      return Promise.reject(`promise retry fail: ${fnName, count, delay, err}`);
     }
   }); 
 }; 

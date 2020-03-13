@@ -7,7 +7,9 @@ const service = {
       uuid: '49535343-1e4d-4bd9-ba61-23c647249616',
       value: new Uint8Array(20),
       properties: {
-        notify: true
+        notify: true,
+        write: true,
+        read: true,
       },
       permission: {
         readable: true,
@@ -41,7 +43,7 @@ const adParam = {
     connectable: true,
     serviceUuids: [service.uuid]
   },
-  powerLevel: enums.adPowerLevel.MEDIUM
+  powerLevel: enums.adPowerLevel.HIGH
 }
 
 module.exports = {

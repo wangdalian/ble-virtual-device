@@ -8,6 +8,6 @@ Page({
   onLoad: function () {
     // TODO: 检查蓝牙开关
   },
-  start: bleModule.start,
+  start: bleModule.startBle,
   stop: bleModule.stop
 })
