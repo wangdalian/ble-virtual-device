@@ -29,7 +29,8 @@ function promiseRetry(fn, fnName, count, delay, ...p) {
         return promiseRetry(fn, fnName, count - 1, delay, ...p); 
       })
     } else {
-      return Promise.reject(`promise retry fail: ${fnName, count, delay, err}`);
+      const info = {fnName, count, delay, err}
+      return Promise.reject(`promise retry fail: ${info}`);
     }
   }); 
 }; 

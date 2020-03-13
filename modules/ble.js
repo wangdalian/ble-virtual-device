@@ -11,7 +11,9 @@ const connectDevices = {};
 // TODO: 增加蓝牙开关检查
 
 // 连接、断连事件
+// 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function connectStatusEventHandler(res) {
+  if (!server || server.serverId !== res.serverId) return;
   if (res.connected) {
     connectDevices[res.deviceId] = true // 连接成功的加入到连接列表里面
     wxBle.stopAd(server).then(() => {
@@ -23,13 +25,15 @@ function connectStatusEventHandler(res) {
 }
 
 // 特征值读取事件
+// 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function charReadEventHandler(res) {
-
+  if (!server || server.serverId !== res.serverId) return;
 }
 
 // 特征值写入事件
+// 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function charWriteEventHandler(res) {
-
+  if (!server || server.serverId !== res.serverId) return;
 } 
 
 // 启动：创建server -> 添加服务 -> 广播 -> 监听事件
@@ -90,7 +94,8 @@ function init() {
 }
 
 function startBle() {
-  return util.promiseRetry(restart, 'restart', 5, 200).then(() => {
+  co(function* () {
+    yield util.promiseRetry(restart, 'restart', 5, 200)
     logger.info('start ble ok')
   }).catch(ex => {
     logger.error('start ble err:', ex)
