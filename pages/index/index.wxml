@@ -1,0 +1,5 @@
+<!--index.wxml-->
+<view class="container">
+  <button bindtap="start">开启</button>
+  <button bindtap="stop">停止</button>
+</view>
