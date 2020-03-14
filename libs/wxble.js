@@ -2,7 +2,7 @@ const logger = require('./log')
 
 function createServer() {
   return wx.createBLEPeripheralServer().then(res => {
-    logger.info('create server ok')
+    logger.info('create server ok:', res.server.serverId)
     return res.server
   }).catch(ex => {
     logger.error('create server err:', ex)
@@ -51,7 +51,7 @@ function addService(server, service) {
 function openConnectStatusEvent(callback) {
   wx.onBLEPeripheralConnectionStateChanged(function(res) {
     logger.info('connect status event:', res)
-    return callback(res)
+    if (callback) return callback(res)
   });
   logger.info('open connect status event ok')
 }
