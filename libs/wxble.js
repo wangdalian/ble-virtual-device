@@ -147,6 +147,15 @@ function closeBluetoothAdapter() {
   })
 }
 
+function writeCharValue(server, param) {
+  return server.writeCharacteristicValue(param).then(() => {
+    logger.info('write char value ok:', param)
+  }).catch(ex => {
+    logger.error('write char value err:', param)
+    throw(ex)
+  })
+}
+
 module.exports = {
   openBluetoothAdapter,
   closeBluetoothAdapter,
@@ -163,5 +172,6 @@ module.exports = {
   openCharWriteEvent,
   closeConnectStatusEvent,
   closeCharReadEvent,
-  closeCharWriteEvent
+  closeCharWriteEvent,
+  writeCharValue
 }

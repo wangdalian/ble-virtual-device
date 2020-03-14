@@ -1,9 +1,13 @@
 import regeneratorRuntime from '../libs/runtime.js'
+const enums = require('../libs/enum')
+const util = require('../libs/util')
 const co = require('../libs/co');
 const wxBle = require('../libs/wxble')
-const util = require('../libs/util')
 const logger = require('../libs/log')
 const profile = require('../profiles/iw02')
+const memory = require('../dbs/memory')
+const dateTimeChar = require('../chars/dateTime')
+const msgModel = require('../models/msg')
 
 let server = null;
 const connectDevices = {};
@@ -16,10 +20,17 @@ function connectStatusEventHandler(res) {
   if (!server || server.serverId !== res.serverId) return;
   if (res.connected) {
     connectDevices[res.deviceId] = true // 连接成功的加入到连接列表里面
-    wxBle.stopAd(server).then(() => {
+    wxBle.stopAd(server).then(() => { // 连接成功则停止广播
       logger.info('connected stop ad ok:', res)
     }).catch(ex => {
       logger.error('connected stop ad err:', res, ex)
+    })
+  } else { // 断开连接则开启广播
+    delete connectDevices[res.deviceId]
+    wxBle.startAd(server, profile.adParam).then(() => { // 连接成功则停止广播
+      logger.info('disconnected start ad ok:', res)
+    }).catch(ex => {
+      logger.error('disconnected start ad err:', res, ex)
     })
   }
 }
@@ -28,21 +39,51 @@ function connectStatusEventHandler(res) {
 // 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function charReadEventHandler(res) {
   if (!server || server.serverId !== res.serverId) return;
+  if (res.serviceId !== '0000ff20-0000-1000-8000-00805f9b34fb') return; // 无效的service不做处理
+  const charId = res.characteristicId;
+  const char = profile.service.characteristics.find((item) => item.uuid === charId);
+  if (!char) return; // 无效的char操作不做处理
+  
+  if (charId === profile.dateTimeChar.uuid) { // 读取当前时间
+    wxBle.writeCharValue(server, {
+      serviceId: res.serviceId,
+      characteristicId: res.characteristicId,
+      value: memory.data.dateTime,
+      needNotify: true,
+      callbackId: res.callbackId
+    })
+  }
 }
 
 // 特征值写入事件
 // 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function charWriteEventHandler(res) {
   if (!server || server.serverId !== res.serverId) return;
+  if (res.serviceId !== '0000ff20-0000-1000-8000-00805f9b34fb') return; // 无效的service不做处理
+  const charId = res.characteristicId;
+  const char = profile.service.characteristics.find((item) => item.uuid === charId);
+  if (!char) return; // 无效的char操作不做处理
+
+  // 短消息格式：21ff310302ff31
+  if (charId === profile.sendMsgChar.uuid) { // 发送消息
+    let result = profile.sendMsgCharDataParser(res.value)
+    if (!result.err) msgModel.add(result.value);
+    wxBle.writeCharValue(server, {
+      serviceId: res.serviceId,
+      characteristicId: res.characteristicId,
+      value: new ArrayBuffer(0),
+      needNotify: true,
+      callbackId: res.callbackId
+    })
+  }
 } 
 
 // 启动：创建server -> 添加服务 -> 广播 -> 监听事件
 // TODO: 增加广播开启异常处理, {errCode: 10000, errMsg: "startBLEPeripheralAdvertising:fail:not init:already connected"}
 function start() {
   return co(function*() {
-    yield wxBle.openBluetoothAdapter()
+    // yield wxBle.openBluetoothAdapter()
     server = yield wxBle.createServer()
-    // 注意: 添加服务经常会返回失败，增加重试逻辑
     yield wxBle.addService(server, profile.service)
     yield wxBle.startAd(server, profile.adParam)
     wxBle.openConnectStatusEvent(connectStatusEventHandler)
@@ -56,7 +97,7 @@ function start() {
 }
 
 // 停止：取消监听事件 -> 停止广播 -> 删除服务 -> 关闭server
-// TODO: 这里的所有操作都不会主动断开连接，需要官方支持
+// TODO: 这里的所有操作都不会主动断开连接，需要官方支持，只能暂时依赖random地址机制
 // 调用disconnectList会提示没有连接信息
 function stop() {
   return co(function*() {
@@ -65,7 +106,7 @@ function stop() {
     yield wxBle.disconnectList(Object.keys(connectDevices)).catch(logger.error) // 断开现有的连接
     if (server) yield wxBle.removeService(server, profile.service.uuid).catch(logger.error)
     wxBle.closeConnectStatusEvent()
-    if (server) wxBle.closeCharWriteEvent(server)
+    // if (server) wxBle.closeCharWriteEvent(server)
     if (server) wxBle.closeCharReadEvent(server)
     if (server) yield wxBle.destroyServer(server).catch(logger.error)
     yield wxBle.closeBluetoothAdapter().catch(logger.error)
@@ -93,9 +134,20 @@ function init() {
   })
 }
 
+// 定时更新DateTime Char的时间信息
+function setDateTimeCharTimer() {
+  logger.info('set date time char timer')
+  setInterval(function() {
+    let params = dateTimeChar.now()
+    util.charFieldsPack(dateTimeChar.fieldTypes, params, memory.data.dateTime)
+    // logger.info('update date time char data ok:', params)
+  }, 1000)
+}
+
 function startBle() {
   co(function* () {
     yield util.promiseRetry(restart, 'restart', 5, 200)
+    setDateTimeCharTimer()
     logger.info('start ble ok')
   }).catch(ex => {
     logger.error('start ble err:', ex)

@@ -35,7 +35,44 @@ function promiseRetry(fn, fnName, count, delay, ...p) {
   }); 
 }; 
 
+function uint8Array2Utf8(buffer) {
+  let encodedString = String.fromCharCode.apply(null, buffer)
+  let decodedString = decodeURIComponent(escape((encodedString)))
+  return decodedString
+}
+
+// 将给定的值打包为ArrayBuffer
+// TODO: 支持类型嵌套
+function charFieldsPack(fieldTypes, params, buffer) {
+  params = params || {}
+  let bytes = 0
+  let values = {}
+
+  // 过滤字段并记录值
+  for (let field in fieldTypes) {
+    const type = fieldTypes[field]
+    bytes = bytes + type.length
+    values[field] = params[field] || type.value;
+  }
+  // 将各个字段打包到buffer
+  let _buffer = buffer || new ArrayBuffer(bytes)
+  let offset = 0, view = null
+  for (let field in values) {
+    let type = fieldTypes[field]
+    if (type.name === 'uint8') {
+      view = new Uint8Array(_buffer, offset, type.length)
+    } else if (type.name === 'uint16') {
+      view = new Uint16Array(_buffer, offset, type.length)
+    }
+    view[0] = values[field]
+    offset = offset + fieldTypes[field].length
+  }
+  return _buffer
+}
+
 module.exports = {
   formatTime: formatTime,
   promiseRetry: promiseRetry,
+  charFieldsPack: charFieldsPack,
+  uint8Array2Utf8: uint8Array2Utf8,
 }
