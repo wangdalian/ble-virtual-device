@@ -1,5 +1,39 @@
-<!--index.wxml-->
-<view class="container">
-  <button bindtap="start">开启</button>
-  <button bindtap="stop">停止</button>
+<view style="color: #fff; display: flex; align-items: center; justify-content: center; position: fixed; background-color: #093258; width: 100%; height: 100%;">
+  <view style="display: flex; align-items: center; justify-content: center; background-color: #000; width: 80%; height: 90%; border-radius: 5%; box-shadow: 8px 8px 8px 8px rgba(17,17,17,0.5), -8px 8px 8px 8px rgba(17,17,17,0.5)">
+    <view style="width: 80%; height: 90%; background-color: #111;">
+      <view class="grid col-4 text-center" style="font-size: 40rpx">
+        <view class="padding">
+          <text class="cuIcon-we lg text-gray"></text>
+        </view>
+        <view class="padding"></view>
+        <view class="padding"></view>
+        <view class="padding">
+          <text class="cuIcon-delete lg text-gray"></text>
+        </view>
+      </view>
+      <view class="grid col-2 text-center" style="font-size: 40rpx;">
+        <view class="padding">
+          <text>01/01</text>
+        </view>
+        <view class="padding">
+          <text>Thur</text>
+        </view>
+      </view>
+      <view class="grid col-1 text-center" style="font-size: 200rpx;">
+        <view>
+          <text>16</text>
+        </view>
+      </view>
+      <view class="grid col-1 text-center" style="font-size: 200rpx; margin-top: -50rpx;">
+        <view>
+          <text>39</text>
+        </view>
+      </view>
+      <view class="grid col-1 text-center" style="font-size: 60rpx;">
+        <view class="padding">
+          <text>NEC 测试</text>
+        </view>
+      </view>
+    </view>
+  </view>
 </view>

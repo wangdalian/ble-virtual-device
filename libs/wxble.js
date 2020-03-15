@@ -38,6 +38,13 @@ function startAd(server, param) {
   })
 }
 
+function reAddService(server, service) {
+  return co(function* () {
+    yield removeService(server, service.uuid).catch(logger.info)
+    yield addService(server, service)
+  })
+}
+
 function addService(server, service) {
   if (!server) return Promise.reject(`add service: no server`);
   return server.addService({service}).then(() => {
@@ -173,5 +180,6 @@ module.exports = {
   closeConnectStatusEvent,
   closeCharReadEvent,
   closeCharWriteEvent,
-  writeCharValue
+  writeCharValue,
+  reAddService,
 }

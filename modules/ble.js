@@ -52,7 +52,6 @@ function charReadEventHandler(res) {
       serviceId: res.serviceId,
       characteristicId: res.characteristicId,
       value: memory.data.dateTime,
-      needNotify: true,
       callbackId: res.callbackId
     })
   } else { // 默认返回0
@@ -60,7 +59,6 @@ function charReadEventHandler(res) {
       serviceId: res.serviceId,
       characteristicId: res.characteristicId,
       value: new ArrayBuffer(0),
-      needNotify: true,
       callbackId: res.callbackId
     })
   }
@@ -190,7 +188,12 @@ function stop() {
 }
 
 function restart() {
-  return stop().then(start).catch(ex => {
+  return co(function* () {
+    yield stop()
+    yield util.promiseWait(200)
+    yield start()
+    logger.info('restart ok')
+  }).catch(ex => {
     logger.error('restart err:', ex)
     throw(ex)
   })

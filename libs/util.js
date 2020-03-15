@@ -71,8 +71,9 @@ function charFieldsPack(fieldTypes, params, buffer) {
 }
 
 module.exports = {
-  formatTime: formatTime,
-  promiseRetry: promiseRetry,
-  charFieldsPack: charFieldsPack,
-  uint8Array2Utf8: uint8Array2Utf8,
+  formatTime,
+  promiseWait,
+  promiseRetry,
+  charFieldsPack,
+  uint8Array2Utf8,
 }
