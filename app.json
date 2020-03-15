@@ -1,12 +1,13 @@
 {
   "pages": [
-    "pages/index/index",
-    "pages/msg/msg"
+    "pages/log/log",
+    "pages/msg/msg",
+    "pages/index/index"
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
-    "navigationBarTitleText": "虚拟手环",
+    "navigationBarBackgroundColor": "#111",
+    "navigationBarTitleText": "",
     "navigationBarTextStyle": "black"
   },
   "style": "v2",
