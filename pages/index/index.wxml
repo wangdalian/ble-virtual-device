@@ -1,6 +1,6 @@
 <view style="color: #fff; position: fixed; width: 100%; height: 100%; background-color: #111; ">
   <view style="width: 100%; height: 95%; display: flex; align-items: center; justify-content: center; flex-wrap: wrap;">
-    <swiper current="1" circular style="width: 90%; height: 100%; ">
+    <swiper current="{{currentSwiperItemIndex}}" circular style="width: 90%; height: 100%; ">
       <swiper-item>
         <view style="width: 100%; height: 100%; ">
           <view class="grid col-2" style="padding: 30rpx 0 30rpx 0; border-bottom: solid 1px #fff; font-size: 30rpx; ">

@@ -11,6 +11,7 @@ Page({
    * 页面的初始数据
    */
   data: {
+    currentSwiperItemIndex: 1,
     isRereshing: false,
     statusBarText: '初始化中...',
     logsText: db.data.logsText,
@@ -25,16 +26,17 @@ Page({
     },
     latestMsg: {
       peer: 'E0:DD:70', // 当前连接的对端，只显示后3字节
-      recvTimeStr: '02/28 18:11', // 最新消息时间
+      recvTimeStr: '02/28 18:11:16', // 最新消息时间
       content: '你好，世界', // 最新消息内容
     },
     bandStatus: enumLib.bandStatus.INIT, // 设备状态, 'init' - 初始状态, 'ad' - 广播, 'connect' - 连接
     help: 
  `<ul>
+    <li>广播：设备标识 WX VBAND</li>
     <li>FF21：读取当前时间</li>
     <li>FF22：写入短信消息
       <ul>
-        <li>21FF310302FF31
+        <li>21FF310802FFE4BDA0E5A5BD
           <ul>
             <li>21FF：固定消息头</li>
             <li>31：命令字</li>
@@ -43,7 +45,7 @@ Page({
               <ul>
                 <li>02：短信类型(暂时只支持此一种)</li>
                 <li>FF：消息内容为utf8编码(暂时只支持此一种)</li>
-                <li>31：字符1</li>
+                <li>E4BDA0E5A5BD：字符 你好</li>
               </ul>
             </li>
           <ul>
@@ -79,8 +81,9 @@ Page({
   updateLatestMsg: function(msgItem) {
     let date = new Date(msgItem.recvTime)
     let datePadding = utilLib.getDateTimePadding(date)
-    let dateStr = `${datePadding.month}/${datePadding.day} ${datePadding.hour}:${datePadding.minute}`
+    let dateStr = `${datePadding.month}/${datePadding.day} ${datePadding.hour}:${datePadding.minute}:${datePadding.second}`
     this.setData({
+      currentSwiperItemIndex: 2,
       latestMsg: {
         peer: msgItem.peer.split(':').splice(3).join(':'), 
         recvTimeStr: dateStr, 
@@ -156,9 +159,11 @@ Page({
       if (errStr.includes('not available')) {
         this.setData({statusBarText: '初始化失败，请开启蓝牙和GPS'})
       } else if (errStr.includes('add service fail')) {
-        this.setData({statusBarText: '添加服务失败，请下拉重试'})
+        this.setData({statusBarText: '添加服务失败，请下拉或者重开蓝牙重试'})
+      } else if (errStr.includes('already connected')) {
+        this.setData({statusBarText: '初始化失败，请重开蓝牙下拉重试'})
       } else {
-        this.setData({statusBarText: '初始化失败，请下拉重试'})
+        this.setData({statusBarText: '初始化失败，请下拉或者重开蓝牙重试'})
       }
     }).finally(() => {
       this.isRereshing = false;
