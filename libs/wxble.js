@@ -1,5 +1,6 @@
 import regeneratorRuntime from '../libs/runtime.js'
 const co = require('./co')
+const utilLib = require('../libs/util')
 const logLib = require('../modules/log')
 const logger = logLib.genModuleLogger('wxble')
 
@@ -123,7 +124,6 @@ function destroyServer(server) {
 }
 
 function removeService(server, serviceUuid) {
-  console.log('mmmmmm', server, serviceUuid)
   if (!server) return Promise.reject(`stop ad: no server`)
   return server.removeService({serviceId: serviceUuid}).then(() => {
     logger.info('remove service ok:', serviceUuid)
@@ -160,15 +160,16 @@ function writeCharValue(server, param) {
   })
 }
 
+function atomicAddServiceRetry(server, service) {
+  return utilLib.promiseRetry(atomicAddService, 'atomicAddService', 5, 200, server, service)
+}
+
 function atomicAddService(server, service) {
   return co(function* () {
-    console.log('22222222')
     yield removeService(server, service.uuid).catch(ex => {
       let errStr = JSON.stringify(ex)
       if (!errStr.includes('no service')) throw(ex) // 无服务不报错
-      console.log('xxxxxxxx', ex)
     })
-    console.log('22222223')
     yield addService(server, service)
     logger.info('atomic add service ok')
   }).catch(ex => {
@@ -191,6 +192,10 @@ function atomicStartAd(server, param) {
   })
 }
 
+function atomicStartAdRetry(server, param) {
+  return utilLib.promiseRetry(atomicStartAd, 'atomicStartAd', 3, 200, server, param)
+}
+
 module.exports = {
   openBluetoothAdapter,
   closeBluetoothAdapter,
@@ -199,9 +204,11 @@ module.exports = {
   startAd,
   stopAd,
   atomicStartAd,
+  atomicStartAdRetry,
   addService,
   removeService,
   atomicAddService,
+  atomicAddServiceRetry,
   disconnect,
   disconnectList,
   openConnectStatusEvent,

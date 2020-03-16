@@ -26,17 +26,17 @@ function genModuleLogger(moduleFileName) {
   return {
     info: function() {
       let info = `[${new Date().toISOString()}] [INFO] [${moduleName}] ${parseArguments(arguments)}`
-      console.log(info)
+      if (console.log) console.log(info)
       pageModule.getContext('index').setData({logsText: logModel.append(logLevel.INFO, info)})
     },
     warn: function() {
       let info = `[${new Date().toISOString()}] [WARN] [${moduleName}] ${parseArguments(arguments)}`
-      console.log(info)
+      if (console.log) console.log(info)
       pageModule.getContext('index').setData({logsText: logModel.append(logLevel.WARN, info)})
     },
     error: function() {
       let info = `[${new Date().toISOString()}] [ERROR] [${moduleName}] ${parseArguments(arguments)}`
-      console.error(info)
+      if (console.error) console.error(info)
       pageModule.getContext('index').setData({logsText: logModel.append(logLevel.ERROR, info)})
     },
   };

@@ -28,7 +28,7 @@ let dateTimeCharTimer = null;
 // TODO: 增加蓝牙开关检查
 
 // 连接、断连事件
-// 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
+// 注意：由于重新进入小程序过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function connectStatusEventHandler(res) {
   if (!server || server.serverId.toString() !== res.serverId.toString()) return;
   if (res.connected) {
@@ -47,7 +47,7 @@ function connectStatusEventHandler(res) {
   } else { // 断开连接则开启广播
     isConnected = false
     delete connectDevices[res.deviceId]
-    wxBle.atomicStartAd(server, profile.adParam).then(() => { // 连接成功则停止广播
+    wxBle.atomicStartAdRetry(server, profile.adParam).then(() => { // 连接成功则停止广播
       logger.info('disconnected start ad ok:', res)
       pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
       isStartedAd = true
@@ -60,7 +60,7 @@ function connectStatusEventHandler(res) {
 }
 
 // 特征值读取事件
-// 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
+// 注意：由于重新进入小程序过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function charReadEventHandler(res) {
   if (!server || server.serverId.toString() !== res.serverId.toString()) return;
   if (res.serviceId !== '0000ff20-0000-1000-8000-00805f9b34fb') return; // 无效的service不做处理
@@ -91,7 +91,7 @@ function charReadEventHandler(res) {
 }
 
 // 特征值写入事件
-// 注意：由于测试过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
+// 注意：由于重新进入小程序过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function charWriteEventHandler(res) {
   if (!server || server.serverId.toString() !== res.serverId.toString()) return;
   if (res.serviceId !== '0000ff20-0000-1000-8000-00805f9b34fb') return; // 无效的service不做处理
@@ -189,14 +189,13 @@ function start() {
       wxBle.openCharWriteEvent(server, charWriteEventHandler)
       isOpenCharWriteEvent = true
     }
-    console.log('11111111', isAddedServices)
-    if (!isAddedServices) yield wxBle.atomicAddService(server, profile.service).then(() => {
+    if (!isAddedServices) yield wxBle.atomicAddServiceRetry(server, profile.service).then(() => {
       isAddedServices = true
     }).catch(ex => {
       isAddedServices = false
       throw(ex)
     })
-    if (!isStartedAd) yield wxBle.atomicStartAd(server, profile.adParam).then(() => {
+    if (!isStartedAd) yield wxBle.atomicStartAdRetry(server, profile.adParam).then(() => {
       if (!isConnected) pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD) // 已连接的则不更新图标了
       isStartedAd = true;
     }).catch(ex => {
