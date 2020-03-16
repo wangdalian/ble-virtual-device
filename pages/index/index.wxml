@@ -102,10 +102,10 @@
       </swiper-item>
     </swiper>
   </view>
-  <view wx:if="{{statusBarText === '初始化成功'}}" class="text-green" style="display: fixed; text-align: center; color: #ff0000; font-style: italic; font-size: 25rpx;">
+  <view wx:if="{{statusBarText === '初始化成功'}}" class="text-green" style="display: fixed; text-align: center; font-size: 25rpx;">
     {{ statusBarText }}
   </view>
-  <view wx:if="{{statusBarText !== '初始化成功'}}" class="text-red" style="display: fixed; text-align: center; color: #ff0000; font-style: italic; font-size: 25rpx;">
+  <view wx:if="{{statusBarText !== '初始化成功'}}" class="text-red" style="display: fixed; text-align: center; font-size: 25rpx;">
     {{ statusBarText }}
   </view>
 </view>

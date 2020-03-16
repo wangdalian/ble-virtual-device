@@ -146,12 +146,15 @@ Page({
       return; 
     }
     this.isRereshing = true
+    this.setData({statusBarText: '初始化中...'})
     bleModule.startBle().then(() => {
       this.setData({statusBarText: '初始化成功'})
     }).catch(ex => {
       let errStr = JSON.stringify(ex)
       if (errStr.includes('not available')) {
         this.setData({statusBarText: '初始化失败，请开启蓝牙和GPS'})
+      } else if (errStr.includes('add service fail')) {
+        this.setData({statusBarText: '添加服务失败，请下拉重试'})
       } else {
         this.setData({statusBarText: '初始化失败，请下拉重试'})
       }
