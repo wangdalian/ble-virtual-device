@@ -1,4 +1,5 @@
 const enumLib = require('../../libs/enum')
+const utilLib = require('../../libs/util')
 const db = require('../../dbs/memory')
 const pageModule = require('../../modules/page')
 const bleModule = require('../../modules/ble')
@@ -77,7 +78,8 @@ Page({
   },
   updateLatestMsg: function(msgItem) {
     let date = new Date(msgItem.recvTime)
-    let dateStr = `${date.getDate()}/${date.getDay()} ${date.getHours()}:${date.getMinutes()}`
+    let datePadding = utilLib.getDateTimePadding(date)
+    let dateStr = `${datePadding.month}/${datePadding.day} ${datePadding.hour}:${datePadding.minute}`
     this.setData({
       latestMsg: {
         peer: msgItem.peer.split(':').splice(3).join(':'), 
@@ -92,7 +94,7 @@ Page({
   updateDateTime: function () {
     const date = new Date()
     const weekday = ['', 'Mon', 'Tue', 'Wed', 'Thur', 'Fri', 'Sat', 'Sun']
-    const padding = (s) => { return s.toString().length === 1 ? `0${s}` : s }
+    const padding = utilLib.padding2
     const dateTime = {
       year: date.getFullYear(),
       month: padding(date.getMonth() + 1),

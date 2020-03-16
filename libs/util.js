@@ -9,6 +9,16 @@ const formatTime = date => {
   return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':')
 }
 
+const getDateTimePadding = date => {
+  const year = date.getFullYear()
+  const month = padding2(date.getMonth() + 1)
+  const day = padding2(date.getDate())
+  const hour = padding2(date.getHours())
+  const minute = padding2(date.getMinutes())
+  const second = padding2(date.getSeconds())
+  return {year, month, day, hour, minute, second}
+}
+
 const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n
@@ -68,10 +78,14 @@ function charFieldsPack(fieldTypes, params, buffer) {
   return _buffer
 }
 
+const padding2 = (s) => { return s.toString().length === 1 ? `0${s}` : s }
+
 module.exports = {
   formatTime,
   promiseWait,
   promiseRetry,
   charFieldsPack,
   uint8Array2Utf8,
+  padding2,
+  getDateTimePadding,
 }
