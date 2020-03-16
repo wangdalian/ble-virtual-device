@@ -25,8 +25,6 @@ let notifySyncTimer = null;
 let notifySyncCounter = 0;
 let dateTimeCharTimer = null;
 
-// TODO: 增加蓝牙开关检查
-
 // 连接、断连事件
 // 注意：由于重新进入小程序过程中会存在缓存server的情况，即server无法销毁，我们通过存储当前的server进行对比，只处理当前的事件
 function connectStatusEventHandler(res) {
@@ -216,44 +214,6 @@ function start() {
   })
 }
 
-// 停止：取消监听事件 -> 停止广播 -> 删除服务 -> 关闭server
-// TODO: 
-//  1. 这里的所有操作都不会主动断开连接，需要官方支持，只能暂时依赖random地址机制
-//  2. 调用disconnectList会提示没有连接信息
-//  3. server不会主动释放，会存在多个server
-function stop() {
-  return co(function*() {
-    // if (server) yield wxBle.stopAd(server).catch(logger.error).finally(() => {
-    //   pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
-    // })
-    // // yield wxBle.disconnect(Object.keys(connectDevices)[0]).catch(logger.error)
-    // // yield wxBle.disconnectList(Object.keys(connectDevices)).catch(logger.error) // 断开现有的连接
-    if (server) yield wxBle.removeService(server, profile.service.uuid).catch(logger.error)
-    // wxBle.closeConnectStatusEvent()
-    // if (server) wxBle.closeCharWriteEvent(server)
-    // if (server) wxBle.closeCharReadEvent(server)
-    // if (server) yield wxBle.destroyServer(server).catch(logger.error)
-    // yield wxBle.closeBluetoothAdapter().catch(logger.error)
-    logger.info('stop ok')
-  }).catch(ex => {
-    logger.error('stop err:', ex)
-    throw(ex)
-  });
-}
-
-function restart() {
-  return co(function* () {
-    yield stop()
-    yield util.promiseWait(200)
-    yield wxBle.openBluetoothAdapter()
-    yield start()
-    logger.info('restart ok')
-  }).catch(ex => {
-    logger.error('restart err:', ex)
-    throw(ex)
-  })
-}
-
 // 定时更新DateTime Char的时间信息
 function setDateTimeCharTimer() {
   if (dateTimeCharTimer) clearInterval(dateTimeCharTimer)
@@ -269,7 +229,6 @@ function setDateTimeCharTimer() {
 
 function startBle() {
   return co(function* () {
-    // yield util.promiseRetry(restart, 'restart', 5, 200)
     setDateTimeCharTimer()
     yield start()
     logger.info('start ble ok')
@@ -281,7 +240,5 @@ function startBle() {
 
 module.exports = {
   start,
-  stop,
-  restart,
   startBle
 }
