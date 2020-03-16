@@ -157,13 +157,13 @@ Page({
     }).catch(ex => {
       let errStr = JSON.stringify(ex)
       if (errStr.includes('not available')) {
-        this.setData({statusBarText: '初始化失败，请开启蓝牙和GPS'})
+        this.setData({statusBarText: '初始化失败，请开启蓝牙GPS后下拉重试'})
       } else if (errStr.includes('add service fail')) {
-        this.setData({statusBarText: '添加服务失败，请下拉或者重开蓝牙重试'})
+        this.setData({statusBarText: '添加服务失败，请下拉重试或者重开蓝牙GPS后重新进入'})
       } else if (errStr.includes('already connected')) {
-        this.setData({statusBarText: '初始化失败，请重开蓝牙下拉重试'})
+        this.setData({statusBarText: '初始化失败，请下拉重试或者重开蓝牙GPS后重新进入'})
       } else {
-        this.setData({statusBarText: '初始化失败，请下拉或者重开蓝牙重试'})
+        this.setData({statusBarText: '初始化失败，请下拉重试或者重开蓝牙GPS后重新进入'})
       }
     }).finally(() => {
       this.isRereshing = false;

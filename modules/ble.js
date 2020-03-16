@@ -200,7 +200,6 @@ function stop() {
     if (server) wxBle.closeCharReadEvent(server)
     if (server) yield wxBle.destroyServer(server).catch(logger.error)
     yield wxBle.closeBluetoothAdapter().catch(logger.error)
-    server = null
     logger.info('stop ok')
   }).catch(ex => {
     logger.error('stop err:', ex)
