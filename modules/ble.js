@@ -13,6 +13,13 @@ const notifyModel = require('../models/notify')
 const pageModule = require('./page')
 
 let server = null;
+let isStartedAd = false;
+let isAddedServices = false;
+let isOpenedConnectStatusEvent = false;
+let isOpenedCharReadEvent = false;
+let isOpenCharWriteEvent = false;
+let isConnected = false;
+
 const connectDevices = {};
 let notifySyncTimer = null;
 let notifySyncCounter = 0;
@@ -25,23 +32,29 @@ let dateTimeCharTimer = null;
 function connectStatusEventHandler(res) {
   if (!server || server.serverId.toString() !== res.serverId.toString()) return;
   if (res.connected) {
+    isConnected = true
     connectDevices[res.deviceId] = true // 连接成功的加入到连接列表里面
     memory.data.peer = res.deviceId
     wxBle.stopAd(server).then(() => { // 连接成功则停止广播
       logger.info('connected stop ad ok:', res)
       pageModule.getContext('index').updateBandStatus(enums.bandStatus.CONNECT)
+      isStartedAd = false
     }).catch(ex => {
       logger.error('connected stop ad err:', res, ex)
       pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
+      isStartedAd = true
     })
   } else { // 断开连接则开启广播
+    isConnected = false
     delete connectDevices[res.deviceId]
-    wxBle.startAd(server, profile.adParam).then(() => { // 连接成功则停止广播
+    wxBle.atomicStartAd(server, profile.adParam).then(() => { // 连接成功则停止广播
       logger.info('disconnected start ad ok:', res)
       pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
+      isStartedAd = true
     }).catch(ex => {
       logger.error('disconnected start ad err:', res, ex)
       pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
+      isStartedAd = false
     })
   }
 }
@@ -163,18 +176,40 @@ function destroyNotifySyncTimer() {
 // TODO: 增加广播开启异常处理, {errCode: 10000, errMsg: "startBLEPeripheralAdvertising:fail:not init:already connected"}
 function start() {
   return co(function*() {
-    yield wxBle.openBluetoothAdapter()
-    server = yield wxBle.createServer()
-    yield wxBle.addService(server, profile.service)
-    yield wxBle.startAd(server, profile.adParam).then(() => {
-      pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
+    if (!isOpenedConnectStatusEvent) {
+      wxBle.openConnectStatusEvent(connectStatusEventHandler)
+      isOpenedConnectStatusEvent = true
+    }
+    if (!server) server = yield wxBle.createServer()
+    if (!isOpenedCharReadEvent) {
+      wxBle.openCharReadEvent(server, charReadEventHandler)
+      isOpenedCharReadEvent = true
+    }
+    if (!isOpenCharWriteEvent) {
+      wxBle.openCharWriteEvent(server, charWriteEventHandler)
+      isOpenCharWriteEvent = true
+    }
+    console.log('11111111', isAddedServices)
+    if (!isAddedServices) yield wxBle.atomicAddService(server, profile.service).then(() => {
+      isAddedServices = true
     }).catch(ex => {
-      pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
+      isAddedServices = false
       throw(ex)
     })
-    wxBle.openConnectStatusEvent(connectStatusEventHandler)
-    wxBle.openCharReadEvent(server, charReadEventHandler)
-    wxBle.openCharWriteEvent(server, charWriteEventHandler)
+    if (!isStartedAd) yield wxBle.atomicStartAd(server, profile.adParam).then(() => {
+      if (!isConnected) pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD) // 已连接的则不更新图标了
+      isStartedAd = true;
+    }).catch(ex => {
+      let errStr = JSON.stringify(ex)
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
+       // 已经建立的错误忽略，已开启成功的忽略
+      if (!(errStr.includes('already connected'))) {
+        isStartedAd = false
+        throw(ex)
+      }
+      isStartedAd = true;
+    })
+    
     logger.info('start ok')
   }).catch(ex => {
     logger.error('start err:', ex)
@@ -189,17 +224,17 @@ function start() {
 //  3. server不会主动释放，会存在多个server
 function stop() {
   return co(function*() {
-    if (server) yield wxBle.stopAd(server).catch(logger.error).finally(() => {
-      pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
-    })
-    // yield wxBle.disconnect(Object.keys(connectDevices)[0]).catch(logger.error)
-    // yield wxBle.disconnectList(Object.keys(connectDevices)).catch(logger.error) // 断开现有的连接
+    // if (server) yield wxBle.stopAd(server).catch(logger.error).finally(() => {
+    //   pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
+    // })
+    // // yield wxBle.disconnect(Object.keys(connectDevices)[0]).catch(logger.error)
+    // // yield wxBle.disconnectList(Object.keys(connectDevices)).catch(logger.error) // 断开现有的连接
     if (server) yield wxBle.removeService(server, profile.service.uuid).catch(logger.error)
-    wxBle.closeConnectStatusEvent()
-    if (server) wxBle.closeCharWriteEvent(server)
-    if (server) wxBle.closeCharReadEvent(server)
-    if (server) yield wxBle.destroyServer(server).catch(logger.error)
-    yield wxBle.closeBluetoothAdapter().catch(logger.error)
+    // wxBle.closeConnectStatusEvent()
+    // if (server) wxBle.closeCharWriteEvent(server)
+    // if (server) wxBle.closeCharReadEvent(server)
+    // if (server) yield wxBle.destroyServer(server).catch(logger.error)
+    // yield wxBle.closeBluetoothAdapter().catch(logger.error)
     logger.info('stop ok')
   }).catch(ex => {
     logger.error('stop err:', ex)
@@ -211,6 +246,7 @@ function restart() {
   return co(function* () {
     yield stop()
     yield util.promiseWait(200)
+    yield wxBle.openBluetoothAdapter()
     yield start()
     logger.info('restart ok')
   }).catch(ex => {
@@ -236,7 +272,7 @@ function startBle() {
   return co(function* () {
     // yield util.promiseRetry(restart, 'restart', 5, 200)
     setDateTimeCharTimer()
-    yield restart()
+    yield start()
     logger.info('start ble ok')
   }).catch(ex => {
     logger.error('start ble err:', ex)

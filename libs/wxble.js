@@ -1,3 +1,5 @@
+import regeneratorRuntime from '../libs/runtime.js'
+const co = require('./co')
 const logLib = require('../modules/log')
 const logger = logLib.genModuleLogger('wxble')
 
@@ -36,13 +38,6 @@ function startAd(server, param) {
   }).catch(ex => {
     logger.error('start ad err:', param, ex)
     throw(ex)
-  })
-}
-
-function reAddService(server, service) {
-  return co(function* () {
-    yield removeService(server, service.uuid).catch(logger.info)
-    yield addService(server, service)
   })
 }
 
@@ -127,10 +122,11 @@ function destroyServer(server) {
   })
 }
 
-function removeService(server, serviceId) {
+function removeService(server, serviceUuid) {
+  console.log('mmmmmm', server, serviceUuid)
   if (!server) return Promise.reject(`stop ad: no server`)
-  return server.removeService({serviceId}).then(() => {
-    logger.info('remove service ok:', serviceId)
+  return server.removeService({serviceId: serviceUuid}).then(() => {
+    logger.info('remove service ok:', serviceUuid)
   }).catch(ex => {
     logger.error('remove service err:', ex)
     throw(ex)
@@ -164,6 +160,37 @@ function writeCharValue(server, param) {
   })
 }
 
+function atomicAddService(server, service) {
+  return co(function* () {
+    console.log('22222222')
+    yield removeService(server, service.uuid).catch(ex => {
+      let errStr = JSON.stringify(ex)
+      if (!errStr.includes('no service')) throw(ex) // 无服务不报错
+      console.log('xxxxxxxx', ex)
+    })
+    console.log('22222223')
+    yield addService(server, service)
+    logger.info('atomic add service ok')
+  }).catch(ex => {
+    logger.error('atomic add service err:', ex)
+    throw(ex)
+  })
+}
+
+function atomicStartAd(server, param) {
+  return co(function *() {
+    yield stopAd(server)
+    yield startAd(server, param).catch(ex => {
+      let errStr = JSON.stringify(ex)
+      if (!errStr.includes('already connected')) throw(ex) // 已连接则不抛出错误，当断连时会重新发起广播
+    })
+    logger.info('atomic start ad ok')
+  }).catch(ex => {
+    logger.error('atomic start ad err:', ex)
+    throw(ex)
+  })
+}
+
 module.exports = {
   openBluetoothAdapter,
   closeBluetoothAdapter,
@@ -171,8 +198,10 @@ module.exports = {
   destroyServer,
   startAd,
   stopAd,
+  atomicStartAd,
   addService,
   removeService,
+  atomicAddService,
   disconnect,
   disconnectList,
   openConnectStatusEvent,
@@ -182,5 +211,4 @@ module.exports = {
   closeCharReadEvent,
   closeCharWriteEvent,
   writeCharValue,
-  reAddService,
 }
