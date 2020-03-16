@@ -3,17 +3,20 @@ const enums = require('../libs/enum')
 const util = require('../libs/util')
 const co = require('../libs/co');
 const wxBle = require('../libs/wxble')
-const logger = require('../libs/log')
+const logLib = require('./log')
+const logger = logLib.genModuleLogger('ble')
 const profile = require('../profiles/iw02')
 const memory = require('../dbs/memory')
 const dateTimeChar = require('../chars/dateTime')
 const msgModel = require('../models/msg')
 const notifyModel = require('../models/notify')
+const pageModule = require('./page')
 
 let server = null;
 const connectDevices = {};
 let notifySyncTimer = null;
 let notifySyncCounter = 0;
+let dateTimeCharTimer = null;
 
 // TODO: 增加蓝牙开关检查
 
@@ -23,17 +26,22 @@ function connectStatusEventHandler(res) {
   if (!server || server.serverId.toString() !== res.serverId.toString()) return;
   if (res.connected) {
     connectDevices[res.deviceId] = true // 连接成功的加入到连接列表里面
+    memory.data.peer = res.deviceId
     wxBle.stopAd(server).then(() => { // 连接成功则停止广播
       logger.info('connected stop ad ok:', res)
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.CONNECT)
     }).catch(ex => {
       logger.error('connected stop ad err:', res, ex)
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
     })
   } else { // 断开连接则开启广播
     delete connectDevices[res.deviceId]
     wxBle.startAd(server, profile.adParam).then(() => { // 连接成功则停止广播
       logger.info('disconnected start ad ok:', res)
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
     }).catch(ex => {
       logger.error('disconnected start ad err:', res, ex)
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
     })
   }
 }
@@ -51,7 +59,7 @@ function charReadEventHandler(res) {
     wxBle.writeCharValue(server, {
       serviceId: res.serviceId,
       characteristicId: res.characteristicId,
-      value: memory.data.dateTime,
+      value: memory.data.dateTimeHex,
       callbackId: res.callbackId
     })
   } else { // 默认返回0
@@ -79,7 +87,8 @@ function charWriteEventHandler(res) {
     if (result.err) {
       err = result.err
     } else {
-      msgModel.add(result.value);
+      let msg = msgModel.add(result.value);
+      pageModule.getContext('index').updateLatestMsg(msg)
     }
   } else if (charId === profile.notifyChar.uuid) { // 写入触发notify发送测试数据
     let result = profile.notifyCharDataParser(res.value)
@@ -152,7 +161,12 @@ function start() {
     yield wxBle.openBluetoothAdapter()
     server = yield wxBle.createServer()
     yield wxBle.addService(server, profile.service)
-    yield wxBle.startAd(server, profile.adParam)
+    yield wxBle.startAd(server, profile.adParam).then(() => {
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.AD)
+    }).catch(ex => {
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
+      throw(ex)
+    })
     wxBle.openConnectStatusEvent(connectStatusEventHandler)
     wxBle.openCharReadEvent(server, charReadEventHandler)
     wxBle.openCharWriteEvent(server, charWriteEventHandler)
@@ -170,9 +184,11 @@ function start() {
 //  3. server不会主动释放，会存在多个server
 function stop() {
   return co(function*() {
-    if (server) yield wxBle.stopAd(server).catch(logger.error)
-    yield wxBle.disconnect(Object.keys(connectDevices)[0]).catch(logger.error)
-    yield wxBle.disconnectList(Object.keys(connectDevices)).catch(logger.error) // 断开现有的连接
+    if (server) yield wxBle.stopAd(server).catch(logger.error).finally(() => {
+      pageModule.getContext('index').updateBandStatus(enums.bandStatus.INIT)
+    })
+    // yield wxBle.disconnect(Object.keys(connectDevices)[0]).catch(logger.error)
+    // yield wxBle.disconnectList(Object.keys(connectDevices)).catch(logger.error) // 断开现有的连接
     if (server) yield wxBle.removeService(server, profile.service.uuid).catch(logger.error)
     wxBle.closeConnectStatusEvent()
     if (server) wxBle.closeCharWriteEvent(server)
@@ -201,19 +217,22 @@ function restart() {
 
 // 定时更新DateTime Char的时间信息
 function setDateTimeCharTimer() {
+  if (dateTimeCharTimer) clearInterval(dateTimeCharTimer)
   logger.info('set date time char timer')
-  setInterval(function() {
+  dateTimeCharTimer = setInterval(function() {
     let params = dateTimeChar.now()
-    util.charFieldsPack(dateTimeChar.fieldTypes, params, memory.data.dateTime)
+    util.charFieldsPack(dateTimeChar.fieldTypes, params, memory.data.dateTimeHex)
+    // 更新界面时间
+    pageModule.getContext('index').updateDateTime()
     // logger.info('update date time char data ok:', params)
   }, 1000)
 }
 
 function startBle() {
-  co(function* () {
+  return co(function* () {
     // yield util.promiseRetry(restart, 'restart', 5, 200)
-    yield restart()
     setDateTimeCharTimer()
+    yield restart()
     logger.info('start ble ok')
   }).catch(ex => {
     logger.error('start ble err:', ex)

@@ -1,10 +1,10 @@
 {
   "pages": [
-    "pages/log/log",
-    "pages/msg/msg",
     "pages/index/index"
   ],
   "window": {
+    "backgroundColor": "#111",
+    "enablePullDownRefresh":true,
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#111",
     "navigationBarTitleText": "",

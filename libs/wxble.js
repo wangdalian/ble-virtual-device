@@ -1,4 +1,5 @@
-const logger = require('./log')
+const logLib = require('../modules/log')
+const logger = logLib.genModuleLogger('wxble')
 
 function createServer() {
   return wx.createBLEPeripheralServer().then(res => {

@@ -28,8 +28,15 @@ const charFormat = {
   // TODO: 其他的以后用到再加
 }
 
+const bandStatus = {
+  INIT: 'init',
+  AD: 'ad',
+  CONNECT: 'connect'
+}
+
 module.exports = {
   adPowerLevel,
   charFormat,
   sendMsgType,
+  bandStatus,
 }

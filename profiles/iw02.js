@@ -1,6 +1,7 @@
 const enums = require('../libs/enum');
 const utilLib = require('../libs/util')
-const logger = require('../libs/log')
+const logLib = require('../modules/log')
+const logger = logLib.genModuleLogger('iw02')
 
 // 提供当前时间
 const dateTimeChar = {
@@ -72,6 +73,7 @@ function sendMsgCharDataParser(value) {
   const view = new Uint8Array(value)
   if (view[0] !== 0x21 || view[1] !== 0xff) result.err = 'invalid header'
   else if (view[2] !== 0x31) result.err = 'invalid cmd'
+  // TODO: 1.增加分包支持 2.增加类型与长度校验
   else result.value = utilLib.uint8Array2Utf8(view.slice(6))
   logger.info('parsed send msg data:', result)
   return result

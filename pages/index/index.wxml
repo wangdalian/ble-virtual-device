@@ -1,39 +1,100 @@
-<view style="color: #fff; display: flex; align-items: center; justify-content: center; position: fixed; background-color: #093258; width: 100%; height: 100%;">
-  <view style="display: flex; align-items: center; justify-content: center; background-color: #000; width: 100%; height: 100%; border-radius: 5%; box-shadow: 8px 8px 8px 8px rgba(17,17,17,0.5), -8px 8px 8px 8px rgba(17,17,17,0.5)">
-    <view style="width: 100%; height: 100%; background-color: #111;">
-      <view class="grid col-4 text-center" style="font-size: 60rpx">
-        <view class="padding">
-          <text class="cuIcon-we lg text-gray"></text>
+<view style="color: #fff; position: fixed; width: 100%; height: 100%; background-color: #111; ">
+  <view style="width: 100%; height: 95%; display: flex; align-items: center; justify-content: center; flex-wrap: wrap;">
+    <swiper current="1" circular style="width: 90%; height: 100%; ">
+      <swiper-item>
+        <view style="width: 100%; height: 100%; ">
+          <view class="grid col-2" style="padding: 30rpx 0 30rpx 0; border-bottom: solid 1px #fff; font-size: 30rpx; ">
+            <view>
+              <text>日志列表</text>
+            </view>
+            <view>
+              <text></text>
+            </view>
+          </view>
+            <view class="grid col-1 margin-top" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; ">
+              <textarea disabled style="line-height: 300rpx;" maxlength="-1" placeholder="日志列表" style="height: 100%; color: #fff; font-size: 22rpx" value="{{ logsText }}">
+              </textarea>
+            </view>
         </view>
-        <view class="padding"></view>
-        <view class="padding"></view>
-        <view class="padding">
-          <text class="cuIcon-delete lg text-gray"></text>
+      </swiper-item>
+      <swiper-item>
+        <view style="width: 100%; height: 100%; background-color: #111;">
+          <view class="grid col-4 text-center" style="font-size: 60rpx">
+            <view class="padding">
+              <text wx:if="{{ bandStatus === 'ad' }}" class="cuIcon-we lg text-gray"></text>
+              <text wx:if="{{ bandStatus === 'init' }}" class="cuIcon-backdelete lg text-gray"></text>
+              <text wx:if="{{ bandStatus === 'connect' }}" class="cuIcon-wifi lg text-gray"></text>
+            </view>
+            <view class="padding"></view>
+            <view class="padding"></view>
+            <view class="padding">
+              <text class="cuIcon-delete lg text-gray"></text>
+            </view>
+          </view>
+          <view class="grid col-2 text-center" style="font-size: 60rpx;">
+            <view class="padding">
+              <text>{{dateTime.month}}/{{dateTime.day}}</text>
+            </view>
+            <view class="padding">
+              <text>{{dateTime.week}}</text>
+            </view>
+          </view>
+          <view class="grid col-1 text-center" style="font-size: 240rpx;">
+            <view>
+              <text>{{dateTime.hours}}</text>
+            </view>
+          </view>
+          <view class="grid col-1 text-center" style="font-size: 240rpx; margin-top: -60rpx;">
+            <view>
+              <text>{{dateTime.minutes}}</text>
+            </view>
+          </view>
+          <view class="grid col-1 text-center" style="font-size: 60rpx;">
+            <view class="padding">
+              <text>虚拟手环</text>
+            </view>
+          </view>
         </view>
-      </view>
-      <view class="grid col-2 text-center" style="font-size: 60rpx;">
-        <view class="padding">
-          <text>01/01</text>
+      </swiper-item>
+      <swiper-item>
+        <view style="width: 100%; height: 100%; ">
+          <view class="grid col-2" style="padding: 30rpx 0 30rpx 0; border-bottom: solid 1px #fff; font-size: 30rpx;">
+            <view>
+              <text>来源：{{latestMsg.peer}}</text>
+            </view>
+            <view>
+              <text>时间：{{latestMsg.recvTimeStr}}</text>
+            </view>
+          </view>
+          <view class="grid col-1 margin-top" style="font-size: 60rpx;">
+            <view>
+              <text>{{latestMsg.content}}</text>
+            </view>
+          </view>
         </view>
-        <view class="padding">
-          <text>Thur</text>
+      </swiper-item>
+      <swiper-item>
+        <view style="width: 100%; height: 100%; ">
+          <view class="grid col-2" style="padding: 30rpx 0 30rpx 0; border-bottom: solid 1px #fff; font-size: 30rpx; ">
+            <view>
+              <text>蓝牙BLE协议</text>
+            </view>
+            <view>
+              <text></text>
+            </view>
+          </view>
+          <view class="grid col-1 margin-top" style="font-size: 26rpx;">
+            <view>
+              <rich-text nodes="{{help}}">
+                
+              </rich-text>
+            </view>
+          </view>
         </view>
-      </view>
-      <view class="grid col-1 text-center" style="font-size: 240rpx;">
-        <view>
-          <text>16</text>
-        </view>
-      </view>
-      <view class="grid col-1 text-center" style="font-size: 240rpx; margin-top: -60rpx;">
-        <view>
-          <text>39</text>
-        </view>
-      </view>
-      <view class="grid col-1 text-center" style="font-size: 60rpx;">
-        <view class="padding">
-          <text>NEC 测试</text>
-        </view>
-      </view>
-    </view>
+      </swiper-item>
+    </swiper>
+  </view>
+  <view style="text-align: center; color: #ff0000; font-style: italic; font-size: 25rpx;">
+    {{ statusBarText }}
   </view>
 </view>
