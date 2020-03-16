@@ -26,13 +26,13 @@
         <view style="width: 100%; height: 100%; background-color: #111;">
           <view class="grid col-4 text-center" style="font-size: 60rpx">
             <view wx:if="{{ bandStatus === 'ad' }}" class="padding">
-              <text class="cuIcon-we lg"></text>
+              <text class="cuIcon-wifi lg"></text>
             </view>
             <view wx:if="{{ bandStatus === 'init' }}" class="padding" style="transform: rotate(180deg); ">
               <text class="cuIcon-backdelete lg"></text>
             </view>
             <view wx:if="{{ bandStatus === 'connect' }}" class="padding">
-              <text class="cuIcon-wifi lg"></text>
+              <text class="cuIcon-link lg"></text>
             </view>
             <view class="padding"></view>
             <view class="padding"></view>
