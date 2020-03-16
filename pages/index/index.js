@@ -109,7 +109,6 @@ Page({
    */
   onLoad: function (options) {
     pageModule.setContext('index', this)
-    
   },
 
   /**
@@ -141,15 +140,18 @@ Page({
   },
 
   initBle: function () {
+    wx.stopPullDownRefresh()
     if (this.isRereshing) { // 刷新处理中，直接返回
       this.setData({statusBarText: '初始化中...'})
       return; 
     }
+    this.isRereshing = true
     bleModule.startBle().then(() => {
       this.setData({statusBarText: '初始化成功'})
     }).catch(ex => {
-      if (ex.toString().includes('not available')) {
-        this.setData({statusBarText: '初始化失败，请开启蓝牙和定位'})
+      let errStr = JSON.stringify(ex)
+      if (errStr.includes('not available')) {
+        this.setData({statusBarText: '初始化失败，请开启蓝牙和GPS'})
       } else {
         this.setData({statusBarText: '初始化失败，请下拉重试'})
       }

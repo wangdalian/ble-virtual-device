@@ -61,6 +61,11 @@ function charReadEventHandler(res) {
       characteristicId: res.characteristicId,
       value: memory.data.dateTimeHex,
       callbackId: res.callbackId
+    }).catch(ex => {
+      let errStr = JSON.stringify(ex)
+      if (errStr.includes('no active session')) { // 隐藏了，被回收了??
+
+      }
     })
   } else { // 默认返回0
     wxBle.writeCharValue(server, {

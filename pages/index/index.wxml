@@ -11,9 +11,9 @@
               <text></text>
             </view>
           </view>
-            <view class="grid col-1 margin-top" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; ">
+            <view class="grid col-1 margin-top" style="width: 100%; height: 80%; display: flex; align-items: center; justify-content: center; ">
               <scroll-view scroll-y style="line-height: 300rpx; z-index: -1;" maxlength="-1" placeholder="日志列表" style="height: 100%; color: #fff; font-size: 22rpx">
-                <view wx:for="{{logsText}}">
+                <view wx:for="{{logsText}}" wx:key="index">
                   <view wx:if="{{item.level === 'info'}}" class="text-green" style="word-break: break-all;">{{item.text}}</view>
                   <view wx:if="{{item.level === 'warn'}}" class="text-yellow" style="word-break: break-all;">{{item.text}}</view>
                   <view wx:if="{{item.level === 'error'}}" class="text-red" style="word-break: break-all;">{{item.text}}</view>
@@ -25,15 +25,19 @@
       <swiper-item>
         <view style="width: 100%; height: 100%; background-color: #111;">
           <view class="grid col-4 text-center" style="font-size: 60rpx">
-            <view class="padding">
-              <text wx:if="{{ bandStatus === 'ad' }}" class="cuIcon-we lg text-gray"></text>
-              <text wx:if="{{ bandStatus === 'init' }}" class="cuIcon-backdelete lg text-gray"></text>
-              <text wx:if="{{ bandStatus === 'connect' }}" class="cuIcon-wifi lg text-gray"></text>
+            <view wx:if="{{ bandStatus === 'ad' }}" class="padding">
+              <text class="cuIcon-we lg"></text>
+            </view>
+            <view wx:if="{{ bandStatus === 'init' }}" class="padding" style="transform: rotate(180deg); ">
+              <text class="cuIcon-backdelete lg"></text>
+            </view>
+            <view wx:if="{{ bandStatus === 'connect' }}" class="padding">
+              <text class="cuIcon-wifi lg"></text>
             </view>
             <view class="padding"></view>
             <view class="padding"></view>
-            <view class="padding">
-              <text class="cuIcon-delete lg text-gray"></text>
+            <view class="padding" style="transform: rotate(-90deg); ">
+              <text class="cuIcon-delete lg"></text>
             </view>
           </view>
           <view class="grid col-2 text-center" style="font-size: 60rpx;">
@@ -91,7 +95,6 @@
           <view class="grid col-1 margin-top" style="font-size: 26rpx;">
             <view>
               <rich-text nodes="{{help}}">
-                
               </rich-text>
             </view>
           </view>
@@ -99,7 +102,10 @@
       </swiper-item>
     </swiper>
   </view>
-  <view style="text-align: center; color: #ff0000; font-style: italic; font-size: 25rpx;">
+  <view wx:if="{{statusBarText === '初始化成功'}}" class="text-green" style="display: fixed; text-align: center; color: #ff0000; font-style: italic; font-size: 25rpx;">
+    {{ statusBarText }}
+  </view>
+  <view wx:if="{{statusBarText !== '初始化成功'}}" class="text-red" style="display: fixed; text-align: center; color: #ff0000; font-style: italic; font-size: 25rpx;">
     {{ statusBarText }}
   </view>
 </view>
