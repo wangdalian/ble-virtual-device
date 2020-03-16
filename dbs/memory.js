@@ -18,7 +18,7 @@ const data = {
     interval: 200, // 上报间隔
     count: 0 // 上报条数，> 0上报完成后自动停止上报，=0一直上报
   }, 
-  logsText: ''
+  logsText: []
 }
 
 module.exports = {

@@ -12,7 +12,13 @@ function parseArguments(params) {
   for (let key in params) {
     result.push(parseArgument(params[key]))
   }
-  return result.join(', ')
+  return result.join()
+}
+
+const logLevel = {
+  INFO: 'info',
+  WARN: 'warn',
+  ERROR: 'error'
 }
 
 function genModuleLogger(moduleFileName) {
@@ -21,17 +27,17 @@ function genModuleLogger(moduleFileName) {
     info: function() {
       let info = `[${new Date().toISOString()}] [INFO] [${moduleName}] ${parseArguments(arguments)}`
       console.log(info)
-      pageModule.getContext('index').setData({logsText: logModel.append(info)})
+      pageModule.getContext('index').setData({logsText: logModel.append(logLevel.INFO, info)})
     },
     warn: function() {
       let info = `[${new Date().toISOString()}] [WARN] [${moduleName}] ${parseArguments(arguments)}`
       console.log(info)
-      pageModule.getContext('index').setData({logsText: logModel.append(info)})
+      pageModule.getContext('index').setData({logsText: logModel.append(logLevel.WARN, info)})
     },
     error: function() {
       let info = `[${new Date().toISOString()}] [ERROR] [${moduleName}] ${parseArguments(arguments)}`
       console.error(info)
-      pageModule.getContext('index').setData({logsText: logModel.append(info)})
+      pageModule.getContext('index').setData({logsText: logModel.append(logLevel.ERROR, info)})
     },
   };
 }

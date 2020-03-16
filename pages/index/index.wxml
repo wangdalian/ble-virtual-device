@@ -12,8 +12,13 @@
             </view>
           </view>
             <view class="grid col-1 margin-top" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; ">
-              <textarea disabled style="line-height: 300rpx;" maxlength="-1" placeholder="日志列表" style="height: 100%; color: #fff; font-size: 22rpx" value="{{ logsText }}">
-              </textarea>
+              <scroll-view scroll-y style="line-height: 300rpx; z-index: -1;" maxlength="-1" placeholder="日志列表" style="height: 100%; color: #fff; font-size: 22rpx">
+                <view wx:for="{{logsText}}">
+                  <view wx:if="{{item.level === 'info'}}" class="text-green" style="word-break: break-all;">{{item.text}}</view>
+                  <view wx:if="{{item.level === 'warn'}}" class="text-yellow" style="word-break: break-all;">{{item.text}}</view>
+                  <view wx:if="{{item.level === 'error'}}" class="text-red" style="word-break: break-all;">{{item.text}}</view>
+                </view>
+              </scroll-view>
             </view>
         </view>
       </swiper-item>

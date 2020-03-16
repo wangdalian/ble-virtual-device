@@ -148,7 +148,11 @@ Page({
     bleModule.startBle().then(() => {
       this.setData({statusBarText: '初始化成功'})
     }).catch(ex => {
-      this.setData({statusBarText: '初始化失败，请下拉重试'})
+      if (ex.toString().includes('not available')) {
+        this.setData({statusBarText: '初始化失败，请开启蓝牙和定位'})
+      } else {
+        this.setData({statusBarText: '初始化失败，请下拉重试'})
+      }
     }).finally(() => {
       this.isRereshing = false;
     })
